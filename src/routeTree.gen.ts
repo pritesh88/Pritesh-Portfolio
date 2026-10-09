@@ -10,11 +10,35 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CheckRouteImport } from './routes/check'
+import { Route as PlanRouteImport } from './routes/plan'
+import { Route as ForSlugRouteImport } from './routes/for.$slug'
+import { Route as ResourcesSlugRouteImport } from './routes/resources.$slug'
 import { Route as WorkSlugRouteImport } from './routes/work.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckRoute = CheckRouteImport.update({
+  id: '/check',
+  path: '/check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanRoute = PlanRouteImport.update({
+  id: '/plan',
+  path: '/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForSlugRoute = ForSlugRouteImport.update({
+  id: '/for/$slug',
+  path: '/for/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesSlugRoute = ResourcesSlugRouteImport.update({
+  id: '/resources/$slug',
+  path: '/resources/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkSlugRoute = WorkSlugRouteImport.update({
@@ -25,27 +49,52 @@ const WorkSlugRoute = WorkSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/check': typeof CheckRoute
+  '/plan': typeof PlanRoute
+  '/for/$slug': typeof ForSlugRoute
+  '/resources/$slug': typeof ResourcesSlugRoute
   '/work/$slug': typeof WorkSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/check': typeof CheckRoute
+  '/plan': typeof PlanRoute
+  '/for/$slug': typeof ForSlugRoute
+  '/resources/$slug': typeof ResourcesSlugRoute
   '/work/$slug': typeof WorkSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/check': typeof CheckRoute
+  '/plan': typeof PlanRoute
+  '/for/$slug': typeof ForSlugRoute
+  '/resources/$slug': typeof ResourcesSlugRoute
   '/work/$slug': typeof WorkSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/work/$slug'
+  fullPaths:
+    '/' | '/check' | '/plan' | '/for/$slug' | '/resources/$slug' | '/work/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/work/$slug'
-  id: '__root__' | '/' | '/work/$slug'
+  to:
+    '/' | '/check' | '/plan' | '/for/$slug' | '/resources/$slug' | '/work/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/check'
+    | '/plan'
+    | '/for/$slug'
+    | '/resources/$slug'
+    | '/work/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CheckRoute: typeof CheckRoute
+  PlanRoute: typeof PlanRoute
+  ForSlugRoute: typeof ForSlugRoute
+  ResourcesSlugRoute: typeof ResourcesSlugRoute
   WorkSlugRoute: typeof WorkSlugRoute
 }
 
@@ -56,6 +105,34 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check': {
+      id: '/check'
+      path: '/check'
+      fullPath: '/check'
+      preLoaderRoute: typeof CheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plan': {
+      id: '/plan'
+      path: '/plan'
+      fullPath: '/plan'
+      preLoaderRoute: typeof PlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for/$slug': {
+      id: '/for/$slug'
+      path: '/for/$slug'
+      fullPath: '/for/$slug'
+      preLoaderRoute: typeof ForSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources/$slug': {
+      id: '/resources/$slug'
+      path: '/resources/$slug'
+      fullPath: '/resources/$slug'
+      preLoaderRoute: typeof ResourcesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/work/$slug': {
@@ -70,6 +147,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CheckRoute: CheckRoute,
+  PlanRoute: PlanRoute,
+  ForSlugRoute: ForSlugRoute,
+  ResourcesSlugRoute: ResourcesSlugRoute,
   WorkSlugRoute: WorkSlugRoute,
 }
 export const routeTree = rootRouteImport

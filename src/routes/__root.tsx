@@ -12,12 +12,18 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportError } from "../lib/error-reporting";
 
+// Set VITE_GA_ID (a GA4 measurement ID) to enable analytics; nothing loads without it.
+const gaId = import.meta.env["VITE_GA_ID"] as string | undefined;
+
+// Runs before first paint so a saved light preference never flashes dark.
+const themeScript = `try{if(localStorage.getItem("theme")==="light"){var c=document.documentElement.classList;c.remove("dark");c.add("light")}}catch(e){}`;
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-medium text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>
@@ -44,7 +50,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+        <h1 className="text-xl font-medium tracking-tight text-foreground">
           This page didn't load
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -77,16 +83,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Pritesh Lad — Freelance Software Engineer" },
+      { title: "Growwise Studio — Websites that work for your business" },
       {
         name: "description",
         content:
-          "Freelance software engineer and web developer in Pune, India building websites, platforms and intelligent digital products.",
+          "Web development studio in Pune building business websites, redesigns, e-commerce and custom web applications.",
       },
-      { name: "author", content: "Pritesh Lad" },
+      { name: "author", content: "Growwise Studio" },
+      { name: "theme-color", content: "#050507" },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:site_name", content: "Growwise Studio" },
+      { property: "og:locale", content: "en_IN" },
+      { name: "twitter:card", content: "summary" },
     ],
+    scripts: gaId
+      ? [
+          { src: `https://www.googletagmanager.com/gtag/js?id=${gaId}`, async: true },
+          {
+            children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","${gaId}");`,
+          },
+        ]
+      : [],
     links: [
       {
         rel: "stylesheet",
@@ -96,9 +113,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Outfit:wght@400;600&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
   }),
 
@@ -110,8 +129,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <HeadContent />
       </head>
       <body>

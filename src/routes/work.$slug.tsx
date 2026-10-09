@@ -1,9 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, Github } from "lucide-react";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Sections";
+import { PageShell } from "@/components/PageShell";
+import { BrowserFrame } from "@/components/BrowserFrame";
+import { PhoneFrame } from "@/components/PhoneFrame";
+import { btnPrimary } from "@/components/Cta";
+import { FinalCta } from "@/components/Sections";
 import { Reveal } from "@/components/Reveal";
 import { projects } from "@/data/site";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/work/$slug")({
   loader: ({ params }) => {
@@ -17,23 +21,30 @@ export const Route = createFileRoute("/work/$slug")({
         meta: [{ title: "Case study not found" }, { name: "robots", content: "noindex" }],
       };
     }
-    const t = `${loaderData.project.name} — Case study · Pritesh Lad`;
-    return {
-      meta: [
-        { title: t },
-        { name: "description", content: loaderData.project.summary },
-        { property: "og:title", content: t },
-        { property: "og:description", content: loaderData.project.summary },
-      ],
-    };
+    const { project } = loaderData;
+    return seo({
+      title: `${project.name} — Case study · Growwise Studio`,
+      description: project.summary,
+      path: `/work/${project.slug}`,
+    });
   },
   component: CaseStudy,
 });
 
-function Block({ title, children }: { title: string; children: React.ReactNode }) {
+function Block({
+  step,
+  title,
+  children,
+}: {
+  step: string;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <Reveal className="glass rounded-3xl p-6 sm:p-8">
-      <p className="label">{title}</p>
+      <p className="label">
+        <span className="text-cobalt">{step}</span> · {title}
+      </p>
       <div className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
         {children}
       </div>
@@ -46,9 +57,8 @@ function CaseStudy() {
   const others = projects.filter((p) => p.slug !== project.slug).slice(0, 2);
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="ambient px-4 pb-20 pt-28 sm:px-6 sm:pt-36">
+    <PageShell>
+      <div className="ambient px-4 pb-8 pt-28 sm:px-6 sm:pt-36">
         <article className="mx-auto max-w-5xl">
           <Link
             to="/"
@@ -56,12 +66,14 @@ function CaseStudy() {
             className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
-            All work
+            All case studies
           </Link>
 
-          <header className="mt-8 rise">
-            <p className="label">{project.category}</p>
-            <h1 className="mt-3 font-display text-4xl font-semibold leading-tight text-ink sm:text-6xl">
+          <header className="rise mt-8">
+            <p className="label">
+              {project.category} · {project.client}
+            </p>
+            <h1 className="mt-3 font-display text-4xl font-medium leading-tight text-ink sm:text-6xl">
               {project.name}
             </h1>
             <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
@@ -74,7 +86,7 @@ function CaseStudy() {
                   href={project.liveUrl}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="group inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                  className={btnPrimary}
                 >
                   View live project
                   <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -91,37 +103,57 @@ function CaseStudy() {
                   rel="noreferrer noopener"
                   className="glass inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium"
                 >
-                  <Github className="size-4 text-primary" />
+                  <Github className="size-4 text-cobalt" />
                   Source
                 </a>
               )}
             </div>
           </header>
 
-          <div className="glass mt-12 overflow-hidden rounded-3xl p-2">
-            <img
-              src={project.image}
-              alt={`${project.name} interface preview`}
-              width={1600}
-              height={1000}
-              className="w-full rounded-2xl object-cover object-top"
+          <div className="relative mt-12">
+            <div
+              className="pointer-events-none absolute inset-x-[10%] inset-y-0 -z-10 rounded-full bg-[var(--halo)] blur-[100px]"
+              aria-hidden
             />
+            <BrowserFrame {...(project.liveUrl && { label: new URL(project.liveUrl).host })}>
+              <img
+                src={project.image}
+                alt={`${project.name} interface preview`}
+                width={1600}
+                height={1000}
+                className="w-full object-cover object-top"
+              />
+            </BrowserFrame>
+            {project.mobileImage && (
+              <PhoneFrame className="float-soft absolute -bottom-8 right-3 w-[24%] sm:-right-6 sm:w-[19%]">
+                <img
+                  src={project.mobileImage}
+                  alt={`${project.name} on a phone`}
+                  loading="lazy"
+                  width={520}
+                  height={1125}
+                />
+              </PhoneFrame>
+            )}
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            <Block title="Overview">
-              <p>{project.overview}</p>
+          <div className="mt-14 grid gap-4 lg:grid-cols-2">
+            <Block step="01" title="Business">
+              <p>{project.business}</p>
             </Block>
-            <Block title="Problem">
-              <p>{project.problem}</p>
+            <Block step="02" title="Challenge">
+              <p>{project.challenge}</p>
             </Block>
-            <Block title="My role">
-              <p>{project.role}</p>
+          </div>
+
+          <div className="mt-4">
+            <Block step="03" title="Approach">
+              <p className="max-w-3xl">{project.approach}</p>
             </Block>
           </div>
 
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            <Block title="What I built">
+            <Block step="04" title="What we built">
               <ul className="space-y-3">
                 {project.built.map((b) => (
                   <li key={b} className="flex gap-3">
@@ -130,9 +162,7 @@ function CaseStudy() {
                   </li>
                 ))}
               </ul>
-            </Block>
-            <Block title="Key features">
-              <div className="flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-wrap gap-2">
                 {project.features.map((f) => (
                   <span
                     key={f}
@@ -143,11 +173,14 @@ function CaseStudy() {
                 ))}
               </div>
             </Block>
-          </div>
-
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            <Block title="Technology">
-              <div className="flex flex-wrap gap-2">
+            <Block step="05" title="Outcome">
+              <p className="font-display text-lg font-medium leading-snug text-ink">
+                {project.outcome}
+              </p>
+              <p className="mt-6 text-sm">
+                <span className="font-medium text-foreground">Our role:</span> {project.role}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
                 {project.tech.map((t) => (
                   <span
                     key={t}
@@ -158,13 +191,10 @@ function CaseStudy() {
                 ))}
               </div>
             </Block>
-            <Block title="Outcome">
-              <p>{project.outcome}</p>
-            </Block>
           </div>
 
           <section className="mt-20">
-            <h2 className="font-display text-2xl font-semibold text-ink">Next projects</h2>
+            <h2 className="font-display text-2xl font-medium text-ink">More case studies</h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {others.map((p) => (
                 <Link
@@ -175,7 +205,7 @@ function CaseStudy() {
                 >
                   <img
                     src={p.image}
-                    alt={p.name}
+                    alt=""
                     loading="lazy"
                     width={320}
                     height={200}
@@ -183,18 +213,18 @@ function CaseStudy() {
                   />
                   <div className="min-w-0">
                     <p className="label">{p.category}</p>
-                    <p className="mt-1 truncate font-display text-base font-semibold text-ink">
+                    <p className="mt-1 truncate font-display text-base font-medium text-ink">
                       {p.name}
                     </p>
                   </div>
-                  <ArrowUpRight className="ml-auto size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+                  <ArrowUpRight className="ml-auto size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-cobalt" />
                 </Link>
               ))}
             </div>
           </section>
         </article>
-      </main>
-      <Footer />
-    </div>
+      </div>
+      <FinalCta title="Have a business that needs something like this?" />
+    </PageShell>
   );
 }
